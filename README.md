@@ -2,7 +2,7 @@
 
 [rfparty-monitor](https://github.com/datapartyjs/rfparty-monitor)
 
-[rfparty.xyz](https://rfparty.xyz) ( [code](https://github.com/datapartyjs/rfparty-monitor) )
+[rfparty.xyz](https://rfparty.xyz) ( [code](https://github.com/datapartyjs/rfparty-xyz) )
 
 `sense, plan, party 🤘` 
 
