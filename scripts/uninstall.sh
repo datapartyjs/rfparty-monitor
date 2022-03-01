@@ -9,10 +9,10 @@ sudo sudo systemctl disable rfparty-monitor.service
 sudo rm /etc/systemd/system/rfparty-monitor.service
 
 echo Removing directory link
-sudo rm /usr/lib/rfparty-monitor
+sudo rm -rf /usr/lib/rfparty-monitor
 
 echo Removing executable links
-sudo rm $dir/bin/rfparty-info /usr/sbin/
-sudo rm $dir/bin/rfparty-monitor /usr/sbin/
+sudo rm /usr/sbin/rfparty-info
+sudo rm /usr/sbin/rfparty-monitor
 
 echo Party Over

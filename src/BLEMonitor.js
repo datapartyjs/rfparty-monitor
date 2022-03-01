@@ -13,6 +13,9 @@ const LokiFS = Loki.LokiFsAdapter
 const LSFA = require('lokijs/src/loki-fs-structured-adapter')
 
 
+const SCANNING_WIFI_IFACE="wlan"
+
+
 /** 
  * List of known home zone bssid's for automatic mobile/stationary detection
  * Anytime a majority of listed APs are seen a home_state record will be created indicating the time the sensor left home.
@@ -23,7 +26,7 @@ const BSSID = [
 ]
 
 const dateStamp = moment().format('DD-MM-YYYY')
-const filePath = '/data/ble/log-' + dateStamp + '.db'
+const filePath = '/data/rfparty/ble/log-' + dateStamp + '.db'
 
 console.log('log path'+filePath)
 
@@ -98,7 +101,7 @@ db.loadDatabase({}, async () =>{
   let hasChanges = false;
 
   let lastIsHome = null
-  let homeDetect = new HomeDetector({iface:'wlan0', knownBSSID:BSSID})
+  let homeDetect = new HomeDetector({iface:SCANNING_WIFI_IFACE||'wlan0', knownBSSID:BSSID})
 
 
   setInterval(()=>{

@@ -22,15 +22,13 @@ rfparty-monitor is a tool for wireless situational awareness and debugging. its 
 
 ## File Paths
 
- * /data
-   * ble
-   * gps
-   * wifi
-   * logs
- * /usr/bin/
-   * rfparty-info
-   * rfparty-monitor
- * /etc/systemd/system/rfparty-monitor.service
+ * `/data/rfparty/ble`
+ * `/data/rfparty/gps`
+ * `/data/rfparty/wifi`
+ * `/data/rfparty/logs`
+ * `/usr/bin/rfparty-info`
+ * `/usr/bin/rfparty-monitor`
+ * `/etc/systemd/system/rfparty-monitor.service`
 
 ## Installation
 
@@ -102,3 +100,4 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
 
  * `cd /data/gps`
  * `gpsbabel -i nmea -f "track.foo.nmea" -o gpx,gpxver=1.1 -F "track-foo.gpx"`
+

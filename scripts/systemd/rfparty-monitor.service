@@ -3,8 +3,8 @@ Description=rfparty monitor service
 
 [Service]
 Type=forking
-User=ubuntu
-ExecStart=/home/ubuntu/rfparty-monitor/scripts/start-snif.sh
+User=root
+ExecStart=/usr/lib/rfparty-monitor/scripts/start-snif.sh
 
 [Install]
 WantedBy=multi-user.target

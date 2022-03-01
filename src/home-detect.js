@@ -100,13 +100,17 @@ class HomeDetector extends EventEmitter {
     }
       
 
-    let cmd = 'sudo nmcli ' + args.join(' ')
+    try{
+      let cmd = 'sudo nmcli ' + args.join(' ')
+  
+      const result = await Command.exec(cmd)
+  
+      const obj = this.parseScan(result.stdout.split('\n'))
+      return obj
+    }
+    catch(err){}
 
-    const result = await Command.exec(cmd)
-
-    const obj = this.parseScan(result.stdout.split('\n'))
-
-    return obj
+    return []
   }
 
   async scan(){
