@@ -13,7 +13,7 @@ const LokiFS = Loki.LokiFsAdapter
 const LSFA = require('lokijs/src/loki-fs-structured-adapter')
 
 
-const SCANNING_WIFI_IFACE="wlan"
+const SCANNING_WIFI_IFACE="wlan1"
 
 
 /** 

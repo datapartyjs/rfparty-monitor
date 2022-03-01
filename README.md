@@ -32,11 +32,14 @@ rfparty-monitor is a tool for wireless situational awareness and debugging. its 
 
 ## Installation
 
-`sudo ./scripts/install-requirements.sh`
+
+* `sudo ./scripts/install.sh`
 
 ###  Requirements
 
  * [Ubuntu 20.04](https://releases.ubuntu.com/20.04/) or debian equivalent
+    * Packages: `build-essential bluetooth bluez bluez-hcidump libbluetooth-dev libudev-dev gpsd gpsd-clients gpsbabel python-gps wireless-tools aircrack-ng libpcap-dev`
+    * `sudo ./scripts/install-requirements.sh`
  * [nodejs LTS 16.x](https://github.com/nodesource/distributions/blob/master/README.md)
  * USB GPS (optional)
  * Bluetooth dongle 
@@ -60,6 +63,7 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
 
  * [Twitter](https://twitter.com/datapartyjs)
  * Donate 🤲
+   * Cash.App - $datapartyllc
    * $eth - `0x430c1Bf9CbbbEA845651Ba1536d4B9795696dD5d`
    * $btc(segwit) - `bc1qgynk82txpsadmmzz043lc7edcxd4xl5v8qqr0z`
    * $btc(legacy) - `16wW7HaKvQfoWxZkFEPQysMnyNxjn8YNLN`
@@ -72,7 +76,8 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
  * Support PCAP 💾
    * Hidden Wifi AP
    * Wifi Clients
- * Improved error handling
+ * Improved error handling 🚧
+ * Improve configuration 🛠️
  * Database optimization 👨🏿‍💻
    * High endurance deployments
    * Dynamic detail
@@ -101,3 +106,10 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
  * `cd /data/gps`
  * `gpsbabel -i nmea -f "track.foo.nmea" -o gpx,gpxver=1.1 -F "track-foo.gpx"`
 
+## Modifying
+
+### Selecting Wifi Interface
+
+In [./src/BLEMonitor.js](./src/BLEMonitor.js)
+
+Set `SCANNING_WIFI_IFACE` to your desired wifi scanning interface for home detection.
