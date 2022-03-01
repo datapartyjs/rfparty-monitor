@@ -1,18 +1,20 @@
 {
-  "name": "ble-monitor",
-  "version": "1.0.0",
-  "description": "",
-  "main": "BLEMonitor.js",
+  "name": "@dataparty/rfparty-monitor",
+  "version": "0.1.0",
+  "description": "rfparty monitor daemon",
+  "main": "src/BLEMonitor.js",
   "scripts": {
-    "start": "nodejs ./BLEMonitor.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ./src/start-scanner.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
-    "lokijs": "^1.4.2",
+    "@abandonware/noble": "^1.9.2-15",
+    "debug": "^4.3.3",
+    "lokijs": "1.5.12",
     "moment": "^2.17.1",
     "moment-timezone": "^0.5.11",
-    "noble": "^1.7.0"
+    "node-wifi": "^2.0.16",
+    "pcap": "^3.1.0"
   }
 }

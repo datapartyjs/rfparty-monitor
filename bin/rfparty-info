@@ -1,0 +1,346 @@
+#!/usr/bin/env node
+'use strict';
+
+const Utils = require('../src/utils')
+const Loki = require('lokijs')
+const LokiFS = Loki.LokiFsAdapter
+const moment = require('moment');
+const DeviceIdentifiers = require('../src/device-identifiers')
+
+
+if(process.argv.length != 3){
+  console.log('rfparty-info', )
+}
+
+console.log(process.argv[2])
+
+process.exit()
+
+let db = new Loki(process.argv[2], {})
+
+let commonServices = {}
+let commonCompany = {}
+
+let servicesWithSrvData = {}
+
+let devicesWithManufacturerData = 0
+let devicesWithManufacturerDataAndSrv = 0
+let devicesWithManufacturerDataResolved = 0
+
+let advKeys = []
+
+const applySrvs = {}
+const airPlayData = []
+
+const appleIPMap = {}
+
+function lookupDeviceCompany(code){
+  return  DeviceIdentifiers.COMPANY_IDENTIFIERS[code] 
+}
+
+function lookupAppleService(code){
+  return DeviceIdentifiers.APPLE_Continuity[code]
+}
+
+function lookupDeviceUuid(uuid){
+  let deviceType = null
+
+  if(uuid.length == 4){
+    deviceType = DeviceIdentifiers.UUID16[uuid] 
+  }
+  else if(uuid.length == 32){
+    deviceType = DeviceIdentifiers.UUID[uuid] 
+  }
+
+  return deviceType
+}
+
+function indexServices(device){
+
+  let advK = Object.keys(device.advertisement)
+
+  advK.map(key=>{
+    if(advKeys.indexOf(key) < 0){
+      advKeys.push(key)
+    }
+  })
+
+  if(device.advertisement.manufacturerData ){
+    devicesWithManufacturerData++
+
+
+    let dataLen = device.advertisement.manufacturerData.data.length
+    let dataArr = Uint8Array.from(device.advertisement.manufacturerData.data)
+    let manufacturerData = new Buffer( dataArr.buffer )
+    const companyCode = manufacturerData.slice(0, 2).toString('hex').match(/.{2}/g).reverse().join('')
+
+    if(companyCode == '004c'){
+      const cm = manufacturerData.slice(2, 3).toString('hex')
+
+      if(!applySrvs[cm]){
+        applySrvs[cm] = 1
+      }
+      else{
+        applySrvs[cm]++
+      }
+
+      if(cm =='09'){
+
+        const devIP = manufacturerData.slice( manufacturerData.length-4, manufacturerData.length )
+
+        const appleIp = devIP[0] + '.'
+          + devIP[1] + '.'
+          + devIP[2] + '.'
+          + devIP[3]
+
+        airPlayData.push(appleIp)
+
+        if(!appleIPMap[appleIp]){
+          appleIPMap[appleIp] = 1
+        }
+        else{
+          appleIPMap[appleIp]++
+        }
+      }
+
+
+      //console.log('cm', cm )
+    }
+
+    
+
+    if(!commonCompany[companyCode]){
+      commonCompany[companyCode] = {
+        addresses: [device.address],
+        seen: device.seen.length
+      }
+    }
+    else{
+      commonCompany[companyCode].seen += device.seen.length
+      commonCompany[companyCode].addresses.push( device.address )
+    }
+    
+
+    if(device.advertisement.serviceData.length > 0){
+      devicesWithManufacturerDataAndSrv++
+    }
+  }
+
+  if(device.advertisement.serviceData.length > 0){
+
+    device.advertisement.serviceData.map(srv=>{
+      if(!servicesWithSrvData[srv.uuid]){
+        servicesWithSrvData[srv.uuid] = {
+          seen: device.seen.length,
+          addresses: [device.address]
+        }
+      }
+      else{
+        servicesWithSrvData[srv.uuid].addresses.push(device.address)
+        servicesWithSrvData[srv.uuid].seen += device.seen.length
+      }
+    })
+
+    /*switch(device.advertisement.serviceData[0].uuid){
+      case 'fe9f':
+      case 'fd6f':
+        break;
+      default:
+        console.log(device.advertisement.serviceData[0] )
+        break
+    }*/
+    
+  }
+  
+  device.advertisement.serviceUuids.map(uuid=>{
+    const srv = commonServices[uuid]
+
+    if(!srv){
+      commonServices[uuid] = {
+        addresses: [device.address],
+        seen: device.seen.length
+      }
+    }
+    else{
+      srv.addresses.push(device.address)
+      srv.seen += device.seen.length
+    }
+  })
+
+  
+}
+
+
+db.loadDatabase({}, () =>{
+  console.log('on db load')
+  let bleColl = db.getCollection('ble')
+
+  if(!bleColl){
+    throw "Expected collection [ble]"
+  }
+
+  let recordCount = bleColl.count()
+
+  console.log('has ', recordCount, 'records')
+
+  let docs = bleColl.find({})
+
+  let stableStations = 0
+  let stableDevNames = 0
+  let seens = 0
+  let names = []
+  let covidContacts = 0
+  let tileDevices = 0
+  let fitbitDevices = 0
+
+  
+
+  let devicesWithServices = 0
+
+  docs.map(doc=>{
+
+    indexServices(doc)
+    seens += doc.seen.length
+
+    let firstSeen = moment(doc.seen[0].timestamp)
+    let lastSeen = moment(doc.seen[ doc.seen.length-1 ].timestamp)
+
+    let maxRssi = -1000
+
+    doc.seen.map(see=>{
+      maxRssi = Math.max( maxRssi, see.rssi )
+    })
+
+
+
+    let duration = lastSeen.diff(firstSeen) / 1000
+
+    //console.log(duration, typeof duration)
+
+    if(duration > 60*60){
+      console.log ( doc.address,'(',  doc.advertisement.localName || '', ')', 'span[', moment.duration(duration, 'seconds').humanize(), '] seen [', doc.seen.length, '] best', maxRssi)
+      //console.log( JSON.stringify(doc.advertisement,null,2) )
+      //console.log( doc.advertisement.serviceUuids)
+      ++stableStations
+    }
+    
+    if(doc.advertisement.localName !== undefined){
+      //console.log(doc.advertisement.localName)
+      ++stableDevNames
+      names.push(doc.advertisement.localName + ' seen ' + doc.seen.length)
+    }
+
+    if(doc.advertisement.serviceUuids.length > 0){
+      ++devicesWithServices
+    }
+
+    if(doc.advertisement.serviceUuids.indexOf('fd6f') > -1){
+      //console.log('contact', doc.address)
+      ++covidContacts
+    }
+
+    if(doc.advertisement.serviceUuids.indexOf('feed') > -1){
+      //console.log('contact', doc.address)
+      ++tileDevices
+    }
+
+    if(doc.advertisement.serviceUuids.indexOf('6e7d-4601-bda2-bffaa68956ba') > -1){
+      ++fitbitDevices
+    }
+
+    
+  })
+
+
+  let companyReport = ''
+  for(let code in commonCompany){
+    let companyCode = lookupDeviceCompany(code)
+
+    let co = commonCompany[code]
+
+    if(companyCode){
+      devicesWithManufacturerDataResolved += co.addresses.length
+    }
+
+    companyReport += '\n' + (companyCode ? companyCode+'('+code+')' : code)
+      + '\n\tdevices ' + co.addresses.length
+      + '\tseen ' + co.seen
+  }
+
+  console.log('\n\n\n\tdevices ', recordCount)
+  console.log('\ttotal observations', seens)
+  console.log('\tstable stations', stableStations)
+  console.log('\tobvious device names', stableDevNames)
+  console.log('\tdevices w/manu', devicesWithManufacturerData)
+  console.log('\tdevices w/manu w/srv', devicesWithManufacturerDataAndSrv)
+  console.log('\tdevices w/manu resolved', devicesWithManufacturerDataResolved)
+
+  console.log('\tUnique Apple IPs', Object.keys(appleIPMap).length)
+  console.log('\ttile devices', tileDevices)
+  console.log('\tfitbits', fitbitDevices)
+  console.log('\tclose covid contacts', covidContacts)
+  console.log('\tdevices with services', devicesWithServices)
+  
+
+
+  let identifiedServices = 0
+  let identifiedDevices = 0
+
+
+  let serviceReport = ''
+  for(let uuid in commonServices){
+    const srv = commonServices[uuid]
+
+    let deviceType = lookupDeviceUuid(uuid)
+
+
+    if(deviceType!=null){
+      identifiedServices++
+      identifiedDevices += srv.addresses.length
+    }
+
+    serviceReport+= '\n   ' + (deviceType ? deviceType+'  ('+uuid+')' : uuid)
+    + '\n\tdevices ' + srv.addresses.length
+    + '\tseen ' + srv.seen
+
+  }
+
+  console.log('\tidentified devices', identifiedDevices)
+  console.log('\tidentified services', identifiedServices)
+  console.log('\tunique services', Object.keys(commonServices).length)
+  console.log('\tservices with data', Object.keys(servicesWithSrvData).length)
+  console.log('\tcompanies', Object.keys(commonCompany).length)
+
+  for(let uuid in servicesWithSrvData){
+    let deviceType = lookupDeviceUuid(uuid)
+
+    let srv = servicesWithSrvData[uuid]
+
+    // console.log( deviceType || uuid, '\n\tdevices', srv.addresses.length, '\tseen', srv.seen )
+  }
+
+
+  //console.log(servicesWithSrvData)
+
+  //console.log(advKeys)
+
+  console.log('\n\n\n')
+
+  console.log('\n\nservice report \n\n', serviceReport)
+  //console.log( JSON.stringify( Object.keys(commonServices), null, 2) )
+
+   console.log('\n\ncompany report\n\n', companyReport)
+
+  console.log('names', JSON.stringify(names,null,2))
+
+  console.log('\n\n\nApple Service Types:')
+
+  for(let srv in applySrvs){
+    let name = lookupAppleService(srv)
+    console.log('\t',name, '(', srv, ') devices', applySrvs[srv])
+  }
+
+  //console.log('\n\n\nApple Device IPs', airPlayData)
+
+  console.log(appleIPMap)
+})

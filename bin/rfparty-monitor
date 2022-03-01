@@ -1,0 +1,119 @@
+const Command = require('../src/utils/command')
+const ChildProcess = require('child_process')
+
+const RESTART_ON_EXCEPTION = true
+const RESTART_DELAY_MS = 750
+
+async function getAdapters(){
+  const cmdStr = 'hcitool dev'
+  const{stdout, stderr} =  await Command.exec(cmdStr)
+
+
+  const devices = {}
+
+  stdout
+  .trim()
+  .split('\n')
+  .map(l=>l.trim())
+  .filter(l=>{ return l.indexOf('hci')==0 && l.indexOf('\t') != -1 })
+  .map(d=>{
+    let arr = d.split('\t')
+    devices[arr[0]] = {
+      mac: arr[1]
+    } 
+  })
+
+  
+    
+    
+  return devices
+
+}
+
+
+
+class ModuleRunner {
+  constructor({modulePath}){
+    this.env = process.env
+    this.device = null
+    this.process = null
+    this.modulePath = modulePath
+    this.startFailure = false
+  }
+
+  async stop(){
+    this.process.kill()
+  }
+
+  
+
+  async start(){
+
+    try{
+      this.adapters = await getAdapters()
+
+      this.device = Object.keys(this.adapters)[0]
+      this.env.NOBLE_HCI_DEVICE_ID = this.device.replace('hci','')
+
+      console.log('starting', (new Date).toTimeString())
+      console.log('module', this.modulePath)
+      console.log('device', this.device)
+      //console.log('env', this.env)
+
+      this.process = ChildProcess.fork(this.modulePath, {stdio: ['pipe', 'pipe', 'pipe', 'ipc'], env: process.env})
+      
+
+      this.process.on('exit', this.logExit.bind(this))
+      this.process.on('message', this.handleMessage.bind(this))
+      this.process.stdout.on('data', this.logStdout.bind(this))
+      this.process.stderr.on('data', this.logStderr.bind(this))
+      this.startFailure=false
+    }
+    catch(exception){
+
+      if(RESTART_ON_EXCEPTION){
+
+        if(!this.startFailure){
+          console.log('failed to start', (new Date).toTimeString())
+        }
+        else{
+          process.stdout.write('.')
+        }
+
+        setTimeout(this.start.bind(this), RESTART_DELAY_MS)
+        this.startFailure = true
+      }
+    }
+  }
+
+  async logExit(code){
+    console.log('exit (', code, ') ', (new Date).toTimeString())
+    await this.stop()
+
+    setTimeout(this.start.bind(this), RESTART_DELAY_MS)
+  }
+
+  async handleMessage(){}
+
+  async logStdout(data){
+    await this.logOutput(data, 'stdout')
+  }
+
+  async logStderr(data){
+    await this.logOutput(data, 'stderr')
+  }
+
+  async logOutput(data, type){
+    console.log(type, data.toString())
+  }
+}
+
+
+async function main(){
+  const runner = new ModuleRunner({modulePath: '../src/BLEMonitor.js'})
+  await runner.start()
+}
+
+
+
+main().then(console.log).catch(console.warn)
