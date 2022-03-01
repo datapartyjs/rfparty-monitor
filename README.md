@@ -113,3 +113,7 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
 In [./src/BLEMonitor.js](./src/BLEMonitor.js)
 
 Set `SCANNING_WIFI_IFACE` to your desired wifi scanning interface for home detection.
+
+### Promiscuous Wifi Interface
+
+In [./scripts/start-snif.sh](./scripts/start-snif.sh) change the arodump commands to correctly select your desired promiscuous wifi interface
