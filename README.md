@@ -1,8 +1,10 @@
 # rfparty-monitor
 
-[rfparty.xyz](https://rfparty.xyz)
+[rfparty-monitor](https://github.com/datapartyjs/rfparty-monitor)
 
-`sense, plan, party 🤘🏿` 
+[rfparty.xyz](https://rfparty.xyz) ( [code](https://github.com/datapartyjs/rfparty-monitor) )
+
+`sense, plan, party 🤘` 
 
 ## Usage
 
@@ -69,6 +71,9 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
 
 ## Roadmap 🗺️
 
+ * Support PCAP 💾
+   * Hidden Wifi AP
+   * Wifi Clients
  * Improved error handling
  * Database optimization 👨🏿‍💻
    * High endurance deployments
@@ -80,16 +85,13 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
  * Improve location pipeline 🗺️
    * Log directly to GPX
    * Record GPX track to db
- * Support PCAP
-   * Hidden Wifi AP
-   * Wifi Clients
-   * Traffic Metric
  * Realtime sharing 📡
    * Alerts
- * Wirless Intrussion Detection (WIDS)
+ * Wireless Intrussion Detection (WIDS) 🛡️
    * Common Wifi threats
-   * Emerging BLE threats
- * More frequencies, more protocols
+   * BLE threats
+ * Red teaming 🥷🏼
+ * More frequencies, more protocols 👁️
    * LoRa
    * LoRaWAN
    * SDR tuning & capture
