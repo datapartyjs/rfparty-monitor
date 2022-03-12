@@ -68,7 +68,6 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
    * $btc(segwit) - `bc1qgynk82txpsadmmzz043lc7edcxd4xl5v8qqr0z`
    * $btc(legacy) - `16wW7HaKvQfoWxZkFEPQysMnyNxjn8YNLN`
    * $usdt - `0xF790F8Ce7E6bcdD2aF96De59d342511734B29bB0`
-   * $xmr - `4BzzF8DwBc9Mik5B2rhKJLGrHB7ch3p3cQp7bCD16uRWHbiSpZUPfYEg62jgNKxkdjSuR4iqoxKa3Eb2y5uP7vZHSbdSY7AfsjeQwVLFKg`
 
 
 ## Roadmap 🗺️
