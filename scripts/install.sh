@@ -10,8 +10,8 @@ dir=$(dirname "$(readlink -f "$0")")
 ln -s $(dirname $dir) /usr/lib/rfparty-monitor
 
 echo "Linking executables"
-ln -s $dir/bin/rfparty-info /usr/sbin/
-ln -s $dir/bin/rfparty-monitor /usr/sbin/
+ln -s $dir/../bin/rfparty-info /usr/sbin/
+ln -s $dir/../bin/rfparty-monitor /usr/sbin/
 
 echo "Installing service files"
 cp $dir/systemd/rfparty-monitor.service /etc/systemd/system/
