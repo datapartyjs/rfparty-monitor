@@ -13,7 +13,7 @@ const LokiFS = Loki.LokiFsAdapter
 const LSFA = require('lokijs/src/loki-fs-structured-adapter')
 
 
-const SCANNING_WIFI_IFACE="wlan1"
+const SCANNING_WIFI_IFACE="wlan0"
 
 
 /** 
@@ -38,28 +38,94 @@ class BLEMonitor extends EventEmitter {
   constructor(options){
     super()
     options = options || {}
+    
+    this.scanning = false
+
+    this.resetTimer = null
+
+    noble.on('warning', this.handleWarning.bind(this))
+    noble.on('scanStop', this.handleStopped.bind(this))
     noble.on('discover', this.handleDeviceDiscovery.bind(this))
     noble.on('stateChange', this.handleBleStateChange.bind(this))
   }
 
   async stop(){
-    console.log('stopping')
+    console.log('stopping', (new Date()).toLocaleString())
+
+    if(this.resetTimer != null){
+      clearTimeout(this.resetTimer)
+      this.resetTimer = null
+      console.log('reset cancelled')
+    }
     
+    if(!this.scanning){ return }    
+    
+    this.scanning = false
     await noble.stopScanningAsync()
+
+    console.log('stopped', (new Date()).toLocaleString())
+    
   }
 
   async start(){
-    console.log('starting')
+    console.log('starting', (new Date()).toLocaleString())
 
+    if(this.scanning){ return }
+
+    this.scanning = true
     await noble.startScanningAsync(undefined, false)
     
+    console.log('started', (new Date()).toLocaleString())
+
+    if(this.resetTimer != null){
+      clearTimeout(this.resetTimer)
+      this.resetTimer = null
+      console.log('reset cancelled')
+    }
   }
 
+  handleWarning(){
+
+  } 
+
+  async handleStopped(){
+    console.log("handle stopped BLE - ", (new Date()).toLocaleString())
+    if(this.scanning == true){
+    
+      this.scanning = false
+    
+      console.log('scheduling adapter reset - ', (new Date()).toLocaleString())
+      
+      if(this.resetTimer != null){ return }
+     
+      this.resetTimer = setTimeout(async ()=>{
+
+      this.resetTimer = null
+
+        if(this.scanning==true){
+          console.log('reset bailed, adapter already started', (new Date()).toLocaleString())
+          return
+        }
+
+        console.log('reseting', (new Date()).toLocaleString())
+        // noble.reset()
+        await this.start()
+        console.log('reset finished', (new Date()).toLocaleString())
+      }, 3000)
+      //await this.start()
+    }
+    else { console.log('ignoring stop') }
+      
+  }
+  	
+  	
+  	
   async handleBleStateChange(state){
-    console.log('state changed: '+state)
+    console.log('ble state changed: '+state, (new Date()).toLocaleString())
 
     switch(state){
       case 'resetting':
+        break;
       case 'poweredOn':
         await this.start()
         break
@@ -69,12 +135,14 @@ class BLEMonitor extends EventEmitter {
         break
     }
 
+    /*
     if(noble.state == 'poweredOn'){
       noble.startScanning()
+      this.scanning = true
     }
     else{
       noble.stopScanning()
-    }
+    }*/
   }
 
 
@@ -114,7 +182,7 @@ db.loadDatabase({}, async () =>{
       isHome: homeDetect.isHome
     })
 
-  }, 60000)
+  }, 600000)
 
 
   homeDetect.on('is-home', isHome => {
@@ -185,15 +253,16 @@ db.loadDatabase({}, async () =>{
     else{
       console.log('no changes need saving')
     }
-  }, 10000)
+  }, 120000)
 
 
   setInterval(async ()=>{
-    console.log('stopping scan')
+    console.log('scan interval - state = ',noble.state)
+    console.log('scan interval - stopping scan')
     await monitor.stop()
-    console.log('starting scan')
+    console.log('scan interval - starting scan')
     await monitor.start()
-    console.log('scanning')
+    console.log('scan interval - scanning')
   }, 30000)
 
   monitor.on('address',(device)=>{

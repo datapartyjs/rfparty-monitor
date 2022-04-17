@@ -19,7 +19,7 @@ class HomeDetector extends EventEmitter {
     this.lastScan = null
     this.isHome = false
 
-    this.scanDelayMs = 1000
+    this.scanDelayMs = 15000
   }
 
   stop(){
