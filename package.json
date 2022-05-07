@@ -4,7 +4,8 @@
   "description": "rfparty monitor daemon",
   "main": "src/BLEMonitor.js",
   "scripts": {
-    "start": "node ./bin/rfparty-monitor"
+    "start": "node ./bin/rfparty-monitor",
+    "tail": "tail -f /data/rfparty/logs/active-log.txt"
   },
   "author": "",
   "license": "Apache-2.0",

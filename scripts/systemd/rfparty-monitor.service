@@ -1,5 +1,6 @@
 [Unit]
 Description=rfparty monitor service
+After=network.target ModemManager.service
 
 [Service]
 Type=forking
