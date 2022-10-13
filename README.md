@@ -1,6 +1,6 @@
-# rfparty-monitor
+# rfparty-monitor [![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](https://github.com/emersion/stability-badges#experimental)
 
-[rfparty-monitor](https://github.com/datapartyjs/rfparty-monitor)
+[rfparty-monitor](https://github.com/datapartyjs/rfparty-monitor) 
 
 [rfparty.xyz](https://rfparty.xyz) ( [code](https://github.com/datapartyjs/rfparty-xyz) )
 
@@ -61,13 +61,13 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
 
 ## Follow and Support
 
- * [Twitter](https://twitter.com/datapartyjs)
+ * [Twitter](https://twitter.com/datapartydao)
+ * [Buy it on Google Play](https://play.google.com/store/apps/details?id=xyz.dataparty.rfparty)
  * Donate 🤲
-   * Cash.App - $datapartyllc
    * $eth - `0x430c1Bf9CbbbEA845651Ba1536d4B9795696dD5d`
    * $btc(segwit) - `bc1qgynk82txpsadmmzz043lc7edcxd4xl5v8qqr0z`
    * $btc(legacy) - `16wW7HaKvQfoWxZkFEPQysMnyNxjn8YNLN`
-   * $usdt - `0xF790F8Ce7E6bcdD2aF96De59d342511734B29bB0`
+   * $usdt - `0x62E8a85670A375A3f32E01D71f42ce71d908417B`
 
 
 ## Roadmap 🗺️
@@ -99,13 +99,12 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
    * SDR tuning & capture
  * ... and much more ✨ 
 
+## Troubleshooting
 
-## Converting NMEA to GPX
+### Converting NMEA to GPX
 
  * `cd /data/gps`
  * `gpsbabel -i nmea -f "track.foo.nmea" -o gpx,gpxver=1.1 -F "track-foo.gpx"`
-
-## Modifying
 
 ### Selecting Wifi Interface
 
