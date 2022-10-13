@@ -1,10 +1,13 @@
 # rfparty-monitor [![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](https://github.com/emersion/stability-badges#experimental)
 
+
+[rfparty is a new way to see BLE](https://blog.dataparty.xyz/blog/rfparty-a-new-way-to-see-ble/)
+
+## Components
+
 [rfparty-monitor](https://github.com/datapartyjs/rfparty-monitor) 
 
 [rfparty.xyz](https://rfparty.xyz) ( [code](https://github.com/datapartyjs/rfparty-xyz) )
-
-`sense, plan, party 🤘` 
 
 ## Usage
 
