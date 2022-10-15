@@ -3,6 +3,11 @@
 
 [rfparty is a new way to see BLE](https://blog.dataparty.xyz/blog/rfparty-a-new-way-to-see-ble/)
 
+
+![Collage of Screenshots-768](https://user-images.githubusercontent.com/662932/196006917-4766a791-0447-4245-a09f-7f9ebe81c628.png)
+
+
+
 ## Components
 
 [rfparty-monitor](https://github.com/datapartyjs/rfparty-monitor) 
@@ -13,6 +18,10 @@
 
 rfparty-monitor is a tool for wireless situational awareness and debugging. its like a tricorder, for your wireless world.
 
+### Android
+ * [Available on Google Play](https://play.google.com/store/apps/details?id=xyz.dataparty.rfparty)
+
+### Linux
  * [Setup](#installation)
  * Deploy sensor
  * Retrieve Logs & [Convert to GPX](#converting-nmea-to-gpx)
