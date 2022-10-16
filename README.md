@@ -16,7 +16,7 @@
 
 ## Usage
 
-rfparty-monitor is a tool for wireless situational awareness and debugging. its like a tricorder, for your wireless world.
+rfparty-monitor is a tool for wireless situational awareness and debugging. It's like a tricorder for your wireless world.
 
 ### Android
  * [Available on Google Play](https://play.google.com/store/apps/details?id=xyz.dataparty.rfparty)
@@ -55,14 +55,14 @@ rfparty-monitor is a tool for wireless situational awareness and debugging. its 
  * [nodejs LTS 16.x](https://github.com/nodesource/distributions/blob/master/README.md)
  * USB GPS (optional)
  * Bluetooth dongle 
-    * CSR 4.x work well
-    * Raspi internal works well on ubuntu 18.04 but not 20.04
+    * CSR 4.x works well
+    * Raspi internal works well on Ubuntu 18.04 but not 20.04
  * Wifi dongle supporting promiscuous mode
-    * Alfa wifi work well
+    * Alfa wifi works well
 
 ### Alternate GPS Source
 
-Any smart phone our device capable of outputting GPX 1.0 is currently supported.
+Any smart phone or device capable of outputting GPX 1.0 is currently supported.
 
 * Android
     * [Mendhak's GPX Logger](https://github.com/mendhak/gpslogger/blob/master/README.md#gpslogger----)
@@ -126,4 +126,4 @@ Set `SCANNING_WIFI_IFACE` to your desired wifi scanning interface for home detec
 
 ### Promiscuous Wifi Interface
 
-In [./scripts/start-snif.sh](./scripts/start-snif.sh) change the arodump commands to correctly select your desired promiscuous wifi interface
+In [./scripts/start-snif.sh](./scripts/start-snif.sh) change the arodump commands to correctly select your desired promiscuous wifi interface.
