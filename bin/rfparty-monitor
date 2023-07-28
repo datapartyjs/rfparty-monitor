@@ -8,9 +8,8 @@ const RESTART_ON_EXCEPTION = true
 const RESTART_DELAY_MS = 750
 
 async function getAdapters(){
-  const cmdStr = 'hcitool dev'
+  const cmdStr = 'bluetoothctl list'
   const{stdout, stderr} =  await Command.exec(cmdStr)
-
 
   const devices = {}
 
@@ -18,19 +17,16 @@ async function getAdapters(){
   .trim()
   .split('\n')
   .map(l=>l.trim())
-  .filter(l=>{ return l.indexOf('hci')==0 && l.indexOf('\t') != -1 })
   .map(d=>{
-    let arr = d.split('\t')
-    devices[arr[0]] = {
+    let arr = d.split(' ')
+    devices[arr[2]] = {
       mac: arr[1]
-    } 
+    }
   })
 
-  
-    
-    
-  return devices
+  console.log(devices)
 
+  return devices
 }
 
 
@@ -47,8 +43,6 @@ class ModuleRunner {
   async stop(){
     this.process.kill()
   }
-
-  
 
   async start(){
 
