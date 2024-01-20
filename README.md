@@ -111,7 +111,7 @@ Any smart phone or device capable of outputting GPX 1.0 is currently supported.
 
 ### Converting NMEA to GPX
 
- * `cd /data/gps`
+ * `cd /data/rfparty/gps`
  * `gpsbabel -i nmea -f "track.foo.nmea" -o gpx,gpxver=1.1 -F "track-foo.gpx"`
 
 ### Selecting Wifi Interface
