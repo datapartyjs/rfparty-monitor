@@ -10,11 +10,13 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "@abandonware/noble": "^1.9.2-15",
+    "@abandonware/noble": "git://github.com/datapartyjs/noble.git",
+    "@dataparty/api": "git://github.com/datapartyjs/dataparty-api.git",
     "debug": "^4.3.3",
     "lokijs": "1.5.12",
     "moment": "^2.17.1",
     "moment-timezone": "^0.5.11",
+    "node-gpsd": "^0.3.4",
     "node-wifi": "^2.0.16",
     "pcap": "^3.1.0"
   }

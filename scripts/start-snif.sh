@@ -18,8 +18,8 @@ if [ -f "$activeLog" ]; then
 fi
 
 
-echo "setting up pinephone gpsd"
-sudo /usr/lib/rfparty-monitor/scripts/pinephone/enable-gps.sh &
+#echo "setting up pinephone gpsd"
+#sudo /usr/lib/rfparty-monitor/scripts/pinephone/enable-gps.sh &
 
 echo "setting monitor mode"
 sudo airmon-ng start wlan1
@@ -38,7 +38,7 @@ sudo ln -s /data/rfparty/logs/log.$sessionStamp.txt /data/rfparty/logs/active-lo
 
 #echo "starting gpsd logger"
 
-#sudo gpspipe -r -d -l -o /data/rfparty/gps/track.$sessionStamp.nmea &
+sudo gpspipe -r -d -l -o /data/rfparty/gps/track.$sessionStamp.nmea &
 
 sudo /usr/lib/rfparty-monitor/scripts/wake-loop.sh &
 
