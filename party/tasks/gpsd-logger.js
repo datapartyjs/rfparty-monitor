@@ -63,6 +63,10 @@ class GpsdLoggerTask extends ITask {
       return
     }
 
+    if(!data.time){
+      return
+    }
+
     if(!this.lastTPVFix){
       this.lastTPVFix = data      
     } else if(data.time == this.lastTPVFix.time){
