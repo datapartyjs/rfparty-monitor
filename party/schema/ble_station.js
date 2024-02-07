@@ -12,10 +12,7 @@ class BleStation extends ISchema {
 
   static get Schema(){
     return {
-      summary: {}
-
       ...Helpers.BleStationInfo
-      
     }
   }
 

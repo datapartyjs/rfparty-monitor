@@ -4,6 +4,7 @@
   "description": "rfparty monitor daemon",
   "main": "src/BLEMonitor.js",
   "scripts": {
+    "build": "node ./party/build.js",
     "start": "node ./bin/rfparty-monitor",
     "tail": "tail -f /data/rfparty/logs/active-log.txt"
   },
@@ -13,7 +14,10 @@
     "@abandonware/noble": "git://github.com/datapartyjs/noble.git",
     "@dataparty/api": "git://github.com/datapartyjs/dataparty-api.git",
     "debug": "^4.3.3",
+    "earth-distance-js": "^1.4.1",
     "lokijs": "1.5.12",
+    "md5": "^2.3.0",
+    "mdns": "^2.7.2",
     "moment": "^2.17.1",
     "moment-timezone": "^0.5.11",
     "node-gpsd": "^0.3.4",
