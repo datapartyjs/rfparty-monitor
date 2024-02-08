@@ -18,7 +18,10 @@ class BleMonitorTask extends ITask {
     this.scanning = false
     this.resetTimer = null
     this.scanInterval = null
-    this.scanIntervalMs = 10000 //! @hack
+    this.scanIntervalMs = 30000
+
+    this.packetCount = 0
+    this.stationCount = 0
   }
 
   static get Config(){
@@ -35,6 +38,8 @@ class BleMonitorTask extends ITask {
 
     try{
 
+      
+
       noble.on('warning', this.handleWarning)
       noble.on('scanStop', this.handleStopped)
       noble.on('discover', this.handleDeviceDiscovery)
@@ -46,6 +51,7 @@ class BleMonitorTask extends ITask {
       }
 
       this.scanInterval = setInterval(async ()=>{
+        debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡')
         debug('scan interval - state = ',noble.state)
         debug('scan interval - stopping scan')
         await this.stopScan()
@@ -228,14 +234,43 @@ class BleMonitorTask extends ITask {
   }
 
 
-  handleDeviceDiscovery = (device)=>{
+  handleDeviceDiscovery = async (device)=>{
     //debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.advertisement}`)
 
 
     //! device.advertisement.eir is Buffer
+    
+    let eirString64 = device.advertisement.eir.toString('base64')
 
-    debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.connectable} ${device.scannable} ${device.state} ${device.mtu} ${device.services}`)
+    debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.connectable} ${device.scannable} ${device.state} ${device.mtu} ${eirString64}`)
     //this.emit('address', device)
+
+
+
+    
+    const BleAdv = this.context.party.factory.getFactory('ble_adv')
+    const BleStation = this.context.party.factory.getFactory('ble_station')
+    
+    const dev = {
+      id: device.address,
+      advertising: eirString64,
+      rssi: device.rssi
+    }
+
+    //debug('indexDevice -', dev)
+    
+    let deviceDoc = await BleAdv.indexBleDevice(this.context.party, dev, this.lastLocation)
+
+
+    let station = await BleStation.indexBleStation(this.context.party, deviceDoc)
+
+    if(station.data.timebounds.first == station.data.timebounds.last){
+      this.stationCount++
+      //this.emit('station_count', this.stationCount)
+    }
+
+    this.packetCount++
+    //this.emit('packet_count', this.packetCount)
   }
 }
 

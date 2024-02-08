@@ -80,7 +80,7 @@ module.exports = class BleAdvDocument extends Dataparty.IDocument {
   static async indexBleDevice(party, dev, point){
 
     const now = moment().valueOf()
-    const packetHash = md5(dev.advertising.data)
+    const packetHash = md5(dev.advertising)
 
     let advs = (await party.find()
       .type('ble_adv')
@@ -157,7 +157,7 @@ module.exports = class BleAdvDocument extends Dataparty.IDocument {
       created: now,
       packet: {
         hash: packetHash,
-        base64: dev.advertising.data,
+        base64: dev.advertising,
         seen: 1
       },
 

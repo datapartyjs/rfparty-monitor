@@ -33,13 +33,13 @@ async function main(){
   
   let party = new Dataparty.TingoParty({
     path: dbPath,
-    //noCache: true,
+    noCache: true,
     model: RFPartyModel,
     factories: RFPartyDocuments,
     config: config,
     qbOptions: {
-      debounce: true,
-      find_dedup: true,
+      debounce: false,
+      find_dedup: false,
       timeout: false
     }
   })

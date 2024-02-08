@@ -114,7 +114,7 @@ exports.GapParser = class GapParser{
     let idx = 0
     let fields = []
     while(idx < buffer.length){
-      let field = new GapField( buffer, idx )
+      let field = new exports.GapField( buffer, idx )
 
       if(field.raw.data_length < 1){ break }
       
