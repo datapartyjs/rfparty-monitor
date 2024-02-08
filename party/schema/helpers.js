@@ -116,6 +116,29 @@ exports.BleObservation = {
   hash: {type: String, index: true}   //packet hash
 }
 
+exports.WifiApObservation = {
+  rssi: Number,
+  time: {type:Number, index: true},
+  mac: {type: String, index: true}
+}
+
+exports.WifiApNetworkInfo = {
+  mac: {type: String, index: true},
+  ssid: {type: String, index: true},
+  bssid: {type: String, index: true},
+
+  mode: String,
+  security: String,
+  security_flags: String,
+
+  channel: {type:Number, index: true},
+  frequency: {type:Number, index: true},
+
+  seen: {type: Number, index: true}
+}
+
+
+
 exports.GeoBoundsIndexed = {
   min: exports.LocationIndexed,
   max: exports.LocationIndexed
@@ -157,13 +180,12 @@ exports.BleStationInfo = {
   }
 }
 
-exports.WifiStationInfo = {
+exports.WifiApStation = {
   //source: Utils.actor(['ble_source'], {indexId:true}),
   created: Utils.created,
-  mac: { type: String, maxlength: 20, minlength: 18, index: true},
-  bssid: { type: String, maxlength: 20, minlength: 18, index: true},
-  
-  mode: String,
+  address: { type: String, maxlength: 20, minlength: 18, index: true},
+
+  network: exports.WifiApNetworkInfo,
 
   timebounds: exports.TimeBoundsIndexed,
   location: exports.LocationBoundsIndexed,
@@ -171,7 +193,6 @@ exports.WifiStationInfo = {
   geobounds: exports.GeoBoundsIndexed,
 
   seen: {type: Number, index: true},            //! count of total rx'd packets
-  advertisements: {type: Number, index: true},  //! count of different advertisements
 
   best: {
     time: {type: Number, index: true},

@@ -1,4 +1,16 @@
-const noble = require('@abandonware/noble')
+
+const HCIBindings = require('@abandonware/noble/lib/hci-socket/bindings')
+const Noble = require('@abandonware/noble/lib/noble')
+
+/*const noble = new Noble(new HCIBindings({
+  deviceId: 1,
+  userChannel: true,
+  extended: true
+}));*/
+
+const noble = new Noble(new HCIBindings({}))
+
+//const noble = require('@abandonware/noble/with-custom-binding')({extended: true})
 const ITask = require('@dataparty/api/src/service/itask')
 
 const reach = require('../../src/utils/reach')
@@ -56,6 +68,12 @@ class BleMonitorTask extends ITask {
       if(this.scanInterval !== null){
         clearInterval(this.scanInterval)
         this.scanInterval = null
+      }
+
+      debug('state', noble.state)
+
+      if(noble.state == 'unknown'){
+        //noble.reset()
       }
 
       this.scanInterval = setInterval(async ()=>{
@@ -175,8 +193,8 @@ class BleMonitorTask extends ITask {
           return
         }
 
-        debug('reseting', (new Date()).toLocaleString())
-        noble.reset()
+        //debug('reseting', (new Date()).toLocaleString())
+        //noble.reset()
 
         if(noble.state == 'poweredOn'){
           await this.startScan()
@@ -236,7 +254,7 @@ class BleMonitorTask extends ITask {
 
 
   handleDeviceDiscovery = async (device)=>{
-    //debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.advertisement}`)
+    //debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.mtu} ${Object.keys(device)} ${JSON.stringify(device.advertisement)}`)
 
 
     //! device.advertisement.eir is Buffer
