@@ -94,7 +94,7 @@ class BleMonitorTask extends ITask {
     }
 
     this.scanning = true
-    await noble.startScanningAsync(undefined, false)
+    await noble.startScanningAsync(undefined, true)
     
     debug('started', (new Date()).toLocaleString())
 
