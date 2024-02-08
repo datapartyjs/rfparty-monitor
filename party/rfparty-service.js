@@ -26,9 +26,10 @@ class RfpartyService extends DatapartySrv.IService {
 
     
     this.addTask(Path.join(__dirname, '../party/tasks/gpsd-logger.js'))
+    this.addTask(Path.join(__dirname, '../party/tasks/ble-monitor.js'))
 
     /*
-    this.addTask(Path.join(__dirname, '../party/tasks/ble-monitor.js'))
+    
     this.addTask(Path.join(__dirname, '../party/tasks/lora-baseband-serial-rn2xxx.js'))
     this.addTask(Path.join(__dirname, '../party/tasks/wifi-monitor.js'))
     this.addTask(Path.join(__dirname, '../party/tasks/wifi-ap-monitor.js'))

@@ -15,8 +15,7 @@ class GpsdLoggerTask extends ITask {
       ...options
     })
 
-    debug('new')
-
+    this.disconnected = false
     this.hostname = !options.hostname ? 'localhost' : options.hostname
     this.port = !options.port ? 2947 : options.post
 
@@ -26,14 +25,19 @@ class GpsdLoggerTask extends ITask {
       port: this.port,
       hostname: this.hostname,
       logger:  {
-          info: console.log,
-          warn: console.warn,
-          error: console.error
+          info: ()=>{},
+          warn: debug,
+          error: debug
       },
       parse: true
     })
     
-    debug('newed')
+
+
+    this.gpsdListner.on('TPV', this.onTPV.bind(this))
+    this.gpsdListner.on('disconnected', this.handleDisconnect.bind(this))
+    this.gpsdListner.on('error.connection', this.handleDisconnect.bind(this))
+
   }
 
   static get Config(){
@@ -75,6 +79,7 @@ class GpsdLoggerTask extends ITask {
 
     debug('tpv (', data.lat, ',', data.lon, ')')
     debug('last=',this.lastTPVFix.time, ' now=',data.time)
+    debug(data)
 
     this.lastTPVFix = data
 
@@ -96,29 +101,47 @@ class GpsdLoggerTask extends ITask {
 
     debug('logged point')
   }
+
+  handleDisconnect(){
+    if(this._cancel){ return }
+    if(this.disconnected){ return }
+
+    this.disconnected = true
+    debug('disconnected')
+
+    this.backgroundReject('gpsd disconnected')
+  }
  
   async exec(){
     debug('exec')
 
-    this.gpsdListner.on('TPV', this.onTPV.bind(this))
+    let handle = this.detach()
 
-    await this.connect()
+    try{
 
-    debug('connected')
+      debug('connecting')
+      this.disconnected = false
+      this.connect()
+      
+      this.gpsdListner.watch({
+        class: 'WATCH',
+        json: true,
+        nmea: false
+      })
+    }
+    catch(err){
+      debug('error starting', err)
+    }
 
-    this.gpsdListner.watch({
-      class: 'WATCH',
-      json: true,
-      nmea: false
-    })
-
-    return this.detach()
+    return handle
   }
  
   async stop(){
+
     debug('stopping')
     await this.disconnect()
     debug('stopped')
+    this.backgroundResolve()
   }
 
   static get Name(){
