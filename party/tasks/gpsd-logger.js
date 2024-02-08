@@ -20,6 +20,7 @@ class GpsdLoggerTask extends ITask {
     this.port = !options.port ? 2947 : options.post
 
     this.lastTPVFix = null
+    this.lastLocation = undefined
 
     this.gpsdListner = new gpsd.Listener({
       port: this.port,
@@ -82,6 +83,7 @@ class GpsdLoggerTask extends ITask {
     debug(data)
 
     this.lastTPVFix = data
+    
 
     const location = {
       time: moment(data.time).valueOf(),
@@ -94,6 +96,8 @@ class GpsdLoggerTask extends ITask {
 
       provider: 'gpsd'
     }
+
+    this.lastLocation = location
 
     const GeoTrack = this.context.party.factory.getFactory('geo_track')
 

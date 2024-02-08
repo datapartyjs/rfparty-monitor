@@ -22,6 +22,8 @@ class BleMonitorTask extends ITask {
 
     this.packetCount = 0
     this.stationCount = 0
+
+    this.gpsdTask = null
   }
 
   static get Config(){
@@ -37,7 +39,9 @@ class BleMonitorTask extends ITask {
     let handle = this.detach()
 
     try{
-
+      if(!this.gpsdTask){
+        this.gpsdTask = this.context.serviceRunner.taskRunner.getTask('GpsdLoggerTask')
+      }
       
 
       noble.on('warning', this.handleWarning)
@@ -222,15 +226,6 @@ class BleMonitorTask extends ITask {
       default:
         break
     }
-
-    /*
-    if(noble.state == 'poweredOn'){
-      noble.startScanning()
-      this.scanning = true
-    }
-    else{
-      noble.stopScanning()
-    }*/
   }
 
 
@@ -244,9 +239,6 @@ class BleMonitorTask extends ITask {
 
     debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.connectable} ${device.scannable} ${device.state} ${device.mtu} ${eirString64}`)
     //this.emit('address', device)
-
-
-
     
     const BleAdv = this.context.party.factory.getFactory('ble_adv')
     const BleStation = this.context.party.factory.getFactory('ble_station')
@@ -258,14 +250,27 @@ class BleMonitorTask extends ITask {
     }
 
     //debug('indexDevice -', dev)
+
+    let lastLocation = undefined
+
     
-    let deviceDoc = await BleAdv.indexBleDevice(this.context.party, dev, this.lastLocation)
+
+
+    if(this.gpsdTask){
+      lastLocation = this.gpsdTask.lastLocation
+    }
+    
+    debug(lastLocation)
+
+    let deviceDoc = await BleAdv.indexBleDevice(this.context.party, dev, lastLocation)
 
 
     let station = await BleStation.indexBleStation(this.context.party, deviceDoc)
 
     if(station.data.timebounds.first == station.data.timebounds.last){
       this.stationCount++
+
+      debug(station.data)
       //this.emit('station_count', this.stationCount)
     }
 
