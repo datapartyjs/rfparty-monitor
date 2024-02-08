@@ -4,8 +4,6 @@ const mdns = require('mdns');
 
 // advertise a http server on port 4321
 
-const ad = mdns.createAdvertisement(mdns.tcp('http'), 1234);
-ad.start();
 
 // watch all http servers
 
@@ -15,7 +13,7 @@ var sequence = [
   mdns.rst.makeAddressesUnique()
 ];
 
-var browser = mdns.createBrowser(mdns.tcp('http'), {resolverSequence: sequence, networkInterface: 0});
+var browser = mdns.createBrowser(mdns.tcp('party'), {resolverSequence: sequence, networkInterface: 0});
 
 //var browser = mdns.browseThemAll({networkInterface: 0})
 

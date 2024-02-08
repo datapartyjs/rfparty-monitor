@@ -1,6 +1,8 @@
 const noble = require('@abandonware/noble')
 const ITask = require('@dataparty/api/src/service/itask')
 
+const reach = require('../../src/utils/reach')
+
 const moment = require('moment')
 
 const debug = require('debug')('rfparty.task.ble-monitor')
@@ -22,8 +24,10 @@ class BleMonitorTask extends ITask {
 
     this.packetCount = 0
     this.stationCount = 0
+    this.duplicateCount = 0
 
     this.gpsdTask = null
+    this.advMap = {}
   }
 
   static get Config(){
@@ -55,7 +59,7 @@ class BleMonitorTask extends ITask {
       }
 
       this.scanInterval = setInterval(async ()=>{
-        debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡')
+        debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount)
         debug('scan interval - state = ',noble.state)
         debug('scan interval - stopping scan')
         await this.stopScan()
@@ -108,6 +112,8 @@ class BleMonitorTask extends ITask {
       this.resetTimer = null
       debug('reset cancelled')
     }
+
+    this.advMap = {}
     
     if(!this.scanning || noble.state != 'poweredOn'){ return }
     
@@ -237,11 +243,55 @@ class BleMonitorTask extends ITask {
     
     let eirString64 = device.advertisement.eir.toString('base64')
 
+
+    let now = moment()
+    let heard = reach(this.advMap, `${device.address}.${eirString64}`)
+
+    let createCacheEntry = ()=>{
+      let devCache = reach(this.advMap, device.address)
+
+      if(!devCache){
+        this.advMap[device.address] = {}
+      }
+
+      this.advMap[device.address][eirString64] = [now, device.rssi, device.rssi]  //! timestamp, rssi_low, rssi_high
+    }
+
+    if(heard){
+
+      // check if we heard within a scanInterval?
+
+      let diff = heard[0].diff( now )
+      if(diff < this.scanIntervalMs){
+        // only store if rssi pushes power bounds up or down
+
+        if(device.rssi >= heard[1] && device.rssi <= heard[2]){
+          //debug('\t','skip - within', device.address, heard[1], heard[2])
+          this.duplicateCount++
+          return
+        }
+
+        this.advMap[device.address][eirString64] = [
+          now,
+          (device.rssi < heard[1]) ? device.rssi : heard[1],
+          (device.rssi > heard[2]) ? device.rssi : heard[2]
+        ]
+
+        //debug('bounds push')
+
+      } else {
+        createCacheEntry()
+      }
+  
+    } else {
+      createCacheEntry()
+    }
+
+
     debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.connectable} ${device.scannable} ${device.state} ${device.mtu} ${eirString64}`)
     //this.emit('address', device)
     
-    const BleAdv = this.context.party.factory.getFactory('ble_adv')
-    const BleStation = this.context.party.factory.getFactory('ble_station')
+
     
     const dev = {
       id: device.address,
@@ -249,11 +299,7 @@ class BleMonitorTask extends ITask {
       rssi: device.rssi
     }
 
-    //debug('indexDevice -', dev)
-
     let lastLocation = undefined
-
-    
 
 
     if(this.gpsdTask){
@@ -262,9 +308,10 @@ class BleMonitorTask extends ITask {
     
     debug(lastLocation)
 
+    const BleAdv = this.context.party.factory.getFactory('ble_adv')
+    const BleStation = this.context.party.factory.getFactory('ble_station')
+
     let deviceDoc = await BleAdv.indexBleDevice(this.context.party, dev, lastLocation)
-
-
     let station = await BleStation.indexBleStation(this.context.party, deviceDoc)
 
     if(station.data.timebounds.first == station.data.timebounds.last){
