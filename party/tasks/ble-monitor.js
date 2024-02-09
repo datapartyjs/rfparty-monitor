@@ -91,11 +91,17 @@ class BleMonitorTask extends ITask {
   handleScanTimer = async ()=>{
     debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount)
     debug('scan interval - state = ',noble.state)
-    debug('scan interval - stopping scan')
-    await this.stopScan()
+
+
+    if(noble.state == 'poweredOn' && this.scanning){
+      debug('scan interval - stopping scan')
+      await this.stopScan()
+    }
+
 
     if(noble.state != 'poweredOn'){
       debug('skipping scan start, adapter not powered on')
+      this.scanTimer = setTimeout(this.handleScanTimer, this.scanIntervalMs)
       return
     }
 
