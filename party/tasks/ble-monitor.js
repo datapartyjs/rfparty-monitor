@@ -66,7 +66,7 @@ class BleMonitorTask extends ITask {
       noble.on('stateChange', this.handleBleStateChange)
 
       if(this.scanTimer !== null){
-        clearTimer(this.scanTimer)
+        clearTimeout(this.scanTimer)
         this.scanTimer = null
       }
 
@@ -157,7 +157,7 @@ class BleMonitorTask extends ITask {
     debug('stopping', (new Date()).toLocaleString())
 
     if(this.scanTimer !== null){
-      clearTimer(this.scanTimer)
+      clearTimeout(this.scanTimer)
       this.scanTimer = null
     }
 
@@ -245,7 +245,7 @@ class BleMonitorTask extends ITask {
         }
 
         if(this.scanTimer !== null){
-          clearTimer(this.scanTimer)
+          clearTimeout(this.scanTimer)
           this.scanTimer = null
           debug('scanInterval cancelled')
         }
