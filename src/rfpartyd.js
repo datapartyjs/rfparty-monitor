@@ -27,8 +27,10 @@ async function main(){
   await config.start()
 
   const dbPath = await config.touchDir('/db')
+  const unixSocketPath = Path.join(BASE_PATH, 'unix-socket')
 
   debug('party db location', dbPath)
+  debug('party socket location', unixSocketPath)
 
   
   let party = new Dataparty.TingoParty({
@@ -62,9 +64,42 @@ async function main(){
     //listenUri: 'http://0.0.0.0:4000'
   })
 
+
+
+  const unixSocketHost = new Dataparty.ServiceHost({
+    runner,
+    trust_proxy: false,
+    wsEnabled: true,
+    listenUri: 'file://'+unixSocketPath,
+    wsUpgradePath: '/'
+  })
+  
+
   await party.start()
   await runner.start()
   await host.start()
+  await unixSocketHost.start()
+
+  let exitted = false
+
+  const exitHandler = async()=>{
+
+    if(exitted){return}
+    console.log('exiting')
+
+    exitted = true
+    await unixSocketHost.stop()
+    process.exit()
+  }
+
+  process.on('exit', exitHandler)
+  process.on('SIGINT', exitHandler);
+  // catches "kill pid" (for example: nodemon restart)
+  //process.on('SIGUSR1', exitHandler);
+  //process.on('SIGUSR2', exitHandler);
+
+  // catches uncaught exceptions
+  //process.on('uncaughtException', exitHandler);
 
   console.log('started')
   
