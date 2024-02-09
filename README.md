@@ -1,15 +1,26 @@
-# rfparty-monitor
+# rfparty-monitor [![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](https://github.com/emersion/stability-badges#experimental)
 
-[rfparty-monitor](https://github.com/datapartyjs/rfparty-monitor)
+
+[rfparty is a new way to see BLE](https://blog.dataparty.xyz/blog/rfparty-a-new-way-to-see-ble/)
+
+
+[![rfparty collage ](https://img.youtube.com/vi/kDboDShA8do/0.jpg)](https://www.youtube.com/watch?v=kDboDShA8do)
+
+
+## Components
+
+[rfparty-monitor](https://github.com/datapartyjs/rfparty-monitor) 
 
 [rfparty.xyz](https://rfparty.xyz) ( [code](https://github.com/datapartyjs/rfparty-xyz) )
 
-`sense, plan, party 🤘` 
-
 ## Usage
 
-rfparty-monitor is a tool for wireless situational awareness and debugging. its like a tricorder, for your wireless world.
+rfparty-monitor is a tool for wireless situational awareness and debugging. It's like a tricorder for your wireless world.
 
+### Android
+ * [Available on Google Play](https://play.google.com/store/apps/details?id=xyz.dataparty.rfparty)
+
+### Linux
  * [Setup](#installation)
  * Deploy sensor
  * Retrieve Logs & [Convert to GPX](#converting-nmea-to-gpx)
@@ -44,14 +55,14 @@ rfparty-monitor is a tool for wireless situational awareness and debugging. its 
  * [npm <= 10.3.x](https://github.com/datapartyjs/dataparty-api/issues/91)
  * USB GPS (optional)
  * Bluetooth dongle 
-    * CSR 4.x work well
-    * Raspi internal works well on ubuntu 18.04 but not 20.04
+    * CSR 4.x works well
+    * Raspi internal works well on Ubuntu 18.04 but not 20.04
  * Wifi dongle supporting promiscuous mode
-    * Alfa wifi work well
+    * Alfa wifi works well
 
 ### Alternate GPS Source
 
-Any smart phone our device capable of outputting GPX 1.0 is currently supported.
+Any smart phone or device capable of outputting GPX 1.0 is currently supported.
 
 * Android
     * [Mendhak's GPX Logger](https://github.com/mendhak/gpslogger/blob/master/README.md#gpslogger----)
@@ -62,13 +73,10 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
 
 ## Follow and Support
 
- * [Twitter](https://twitter.com/datapartyjs)
+ * [Twitter](https://twitter.com/datapartydao)
+ * [Buy it on Google Play](https://play.google.com/store/apps/details?id=xyz.dataparty.rfparty)
  * Donate 🤲
-   * Cash.App - $datapartyllc
-   * $eth - `0x430c1Bf9CbbbEA845651Ba1536d4B9795696dD5d`
-   * $btc(segwit) - `bc1qgynk82txpsadmmzz043lc7edcxd4xl5v8qqr0z`
-   * $btc(legacy) - `16wW7HaKvQfoWxZkFEPQysMnyNxjn8YNLN`
-   * $usdt - `0xF790F8Ce7E6bcdD2aF96De59d342511734B29bB0`
+   * https://ko-fi.com/dataparty
 
 
 ## Roadmap 🗺️
@@ -100,13 +108,12 @@ Any smart phone our device capable of outputting GPX 1.0 is currently supported.
    * SDR tuning & capture
  * ... and much more ✨ 
 
+## Troubleshooting
 
-## Converting NMEA to GPX
+### Converting NMEA to GPX
 
- * `cd /data/gps`
+ * `cd /data/rfparty/gps`
  * `gpsbabel -i nmea -f "track.foo.nmea" -o gpx,gpxver=1.1 -F "track-foo.gpx"`
-
-## Modifying
 
 ### Selecting Wifi Interface
 
@@ -116,4 +123,4 @@ Set `SCANNING_WIFI_IFACE` to your desired wifi scanning interface for home detec
 
 ### Promiscuous Wifi Interface
 
-In [./scripts/start-snif.sh](./scripts/start-snif.sh) change the arodump commands to correctly select your desired promiscuous wifi interface
+In [./scripts/start-snif.sh](./scripts/start-snif.sh) change the arodump commands to correctly select your desired promiscuous wifi interface.
