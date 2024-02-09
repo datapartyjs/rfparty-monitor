@@ -58,7 +58,7 @@ async function main(){
     sendFullErrors: true
   })
   
-  const host = new Dataparty.ServiceHost({
+  const webHost = new Dataparty.ServiceHost({
     runner,
     trust_proxy: false,
     //listenUri: 'http://0.0.0.0:4000'
@@ -77,7 +77,7 @@ async function main(){
 
   await party.start()
   await runner.start()
-  await host.start()
+  await webHost.start()
   await unixSocketHost.start()
 
   let exitted = false
@@ -89,6 +89,7 @@ async function main(){
 
     exitted = true
     await unixSocketHost.stop()
+    await webHost.stop()
     process.exit()
   }
 
