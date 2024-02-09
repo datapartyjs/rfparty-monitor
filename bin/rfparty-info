@@ -14,7 +14,6 @@ if(process.argv.length != 3){
 
 console.log(process.argv[2])
 
-process.exit()
 
 let db = new Loki(process.argv[2], {})
 
