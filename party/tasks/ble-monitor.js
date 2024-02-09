@@ -255,7 +255,9 @@ class BleMonitorTask extends ITask {
         noble.off('discover', this.handleDeviceDiscovery)
         noble.off('stateChange', this.handleBleStateChange)
 
-        noble.reset()
+        //noble.reset()
+
+        this.scanning = false
 
         await this.backgroundReject('ble adapter powered off')
       default:
