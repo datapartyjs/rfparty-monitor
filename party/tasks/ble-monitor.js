@@ -72,12 +72,6 @@ class BleMonitorTask extends ITask {
 
       debug('state', noble.state)
 
-      if(noble.state == 'poweredOn'){
-        //noble.reset()
-
-        await this.startScan()
-      }
-
       this.scanInterval = setInterval(async ()=>{
         debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount)
         debug('scan interval - state = ',noble.state)
