@@ -31,7 +31,7 @@ class BleMonitorTask extends ITask {
 
     this.scanning = false
     this.resetTimer = null
-    this.scanInterval = null
+    this.scanTimer = null
     this.scanIntervalMs = 30000
 
     this.packetCount = 0
@@ -65,28 +65,18 @@ class BleMonitorTask extends ITask {
       noble.on('discover', this.handleDeviceDiscovery)
       noble.on('stateChange', this.handleBleStateChange)
 
-      if(this.scanInterval !== null){
-        clearInterval(this.scanInterval)
-        this.scanInterval = null
+      if(this.scanTimer !== null){
+        clearTimer(this.scanTimer)
+        this.scanTimer = null
       }
 
       debug('state', noble.state)
 
-      this.scanInterval = setInterval(async ()=>{
-        debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount)
-        debug('scan interval - state = ',noble.state)
-        debug('scan interval - stopping scan')
-        await this.stopScan()
+      await this.handleScanTimer()
 
-        if(noble.state != 'poweredOn'){
-          debug('skipping scan start, adapter not powered on')
-          return
-        }
-
-        debug('scan interval - starting scan')
-        await this.startScan()
-        debug('scan interval - scanning')
-      }, this.scanIntervalMs)
+      /*this.scanTimer = setInterval(async ()=>{
+        
+      }, this.scanIntervalMs)*/
 
       //await this.stopScan()
       //await this.startScan()
@@ -96,6 +86,25 @@ class BleMonitorTask extends ITask {
     }
 
     return handle
+  }
+
+  handleScanTimer = async ()=>{
+    debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount)
+    debug('scan interval - state = ',noble.state)
+    debug('scan interval - stopping scan')
+    await this.stopScan()
+
+    if(noble.state != 'poweredOn'){
+      debug('skipping scan start, adapter not powered on')
+      return
+    }
+
+    debug('scan interval - starting scan')
+    await this.startScan()
+    debug('scan interval - scanning')
+
+
+    this.scanTimer = setTimeout(this.handleScanTimer, this.scanIntervalMs)
   }
 
   async startScan(){
@@ -141,9 +150,9 @@ class BleMonitorTask extends ITask {
   async stop(){
     debug('stopping', (new Date()).toLocaleString())
 
-    if(this.scanInterval !== null){
-      clearInterval(this.scanInterval)
-      this.scanInterval = null
+    if(this.scanTimer !== null){
+      clearTimer(this.scanTimer)
+      this.scanTimer = null
     }
 
     await this.stopScan()
@@ -229,9 +238,9 @@ class BleMonitorTask extends ITask {
           debug('resetTimer cancelled')
         }
 
-        if(this.scanInterval !== null){
-          clearInterval(this.scanInterval)
-          this.scanInterval = null
+        if(this.scanTimer !== null){
+          clearTimer(this.scanTimer)
+          this.scanTimer = null
           debug('scanInterval cancelled')
         }
 

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node ./party/build.js",
     "start": "node ./bin/rfparty-monitor",
-    "rfpartyd": "DEBUG=rfpartyd,rfparty.task.ble-monitor,Tasker.Task NOBLE_MULTI_ROLE=1 NOBLE_REPORT_ALL_HCI_EVENTS=1 node ./src/rfpartyd.js",
+    "rfpartyd": "DEBUG=rfpartyd,rfparty.task.*,Tasker.Task NOBLE_MULTI_ROLE=1 NOBLE_REPORT_ALL_HCI_EVENTS=1 node ./src/rfpartyd.js",
     "tail": "tail -f /data/rfparty/logs/active-log.txt"
   },
   "author": "",
