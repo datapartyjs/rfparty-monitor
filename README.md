@@ -40,7 +40,8 @@ rfparty-monitor is a tool for wireless situational awareness and debugging. its 
  * [Ubuntu 20.04](https://releases.ubuntu.com/20.04/) or debian equivalent
     * Packages: `build-essential bluetooth bluez bluez-hcidump libbluetooth-dev libudev-dev gpsd gpsd-clients gpsbabel python-gps wireless-tools aircrack-ng libpcap-dev libavahi-compat-libdnssd-dev`
     * `sudo ./scripts/install-requirements.sh`
- * [nodejs LTS 16.x](https://github.com/nodesource/distributions/blob/master/README.md)
+ * [nodejs LTS 18.x or 20.x](https://github.com/nodesource/distributions/blob/master/README.md)
+ * [npm <= 10.3.x](https://github.com/datapartyjs/dataparty-api/issues/91)
  * USB GPS (optional)
  * Bluetooth dongle 
     * CSR 4.x work well
