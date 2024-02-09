@@ -72,8 +72,10 @@ class BleMonitorTask extends ITask {
 
       debug('state', noble.state)
 
-      if(noble.state == 'unknown'){
+      if(noble.state == 'poweredOn'){
         //noble.reset()
+
+        await this.startScan()
       }
 
       this.scanInterval = setInterval(async ()=>{
