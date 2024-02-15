@@ -32,7 +32,7 @@ class BleMonitorTask extends ITask {
     this.scanning = false
     this.resetTimer = null
     this.scanTimer = null
-    this.scanIntervalMs = 30000
+    this.scanIntervalMs = 60000
 
     this.packetCount = 0
     this.stationCount = 0
@@ -292,15 +292,15 @@ class BleMonitorTask extends ITask {
 
       // check if we heard within a scanInterval?
 
-      let diff = heard[0].diff( now )
-      if(diff < this.scanIntervalMs){
+      //let diff = heard[0].diff( now )
+      //if(diff < this.scanIntervalMs){
         // only store if rssi pushes power bounds up or down
 
-        if(device.rssi >= heard[1] && device.rssi <= heard[2]){
+        //if(device.rssi >= heard[1] && device.rssi <= heard[2]){
           //debug('\t','skip - within', device.address, heard[1], heard[2])
           this.duplicateCount++
           return
-        }
+        //}
 
         this.advMap[device.address][eirString64] = [
           now,
@@ -310,9 +310,9 @@ class BleMonitorTask extends ITask {
 
         //debug('bounds push')
 
-      } else {
+      /*} else {
         createCacheEntry()
-      }
+      }*/
   
     } else {
       createCacheEntry()
@@ -343,7 +343,9 @@ class BleMonitorTask extends ITask {
     const BleStation = this.context.party.factory.getFactory('ble_station')
 
     let deviceDoc = await BleAdv.indexBleDevice(this.context.party, dev, lastLocation)
+    debug('deviceDoc')
     let station = await BleStation.indexBleStation(this.context.party, deviceDoc)
+    debug('stationDoc')
 
     if(station.data.timebounds.first == station.data.timebounds.last){
       this.stationCount++
