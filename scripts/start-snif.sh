@@ -6,6 +6,8 @@ sudo mkdir -p /data/rfparty/wifi
 sudo mkdir -p /data/rfparty/logs
 sudo mkdir -p /data/rfparty/agps
 
+rm ~/.rfparty-monitor/unix-socket
+
 activeLog=/data/rfparty/logs/active-log.txt
 previousLog=/data/rfparty/logs/previous-log.txt
 
@@ -32,7 +34,9 @@ echo "starting blemonitor"
 
 sessionStamp=`date +"%Y%m%d-%H-%M-%S"`
 
-npm start --prefix /usr/lib/rfparty-monitor/ &> /data/rfparty/logs/log.$sessionStamp.txt &
+npm run rfpartyd --prefix /usr/lib/rfparty-monitor/ &> /data/rfparty/logs/log.$sessionStamp.txt &
+
+#npm start --prefix /usr/lib/rfparty-monitor/ &> /data/rfparty/logs/log.$sessionStamp.txt &
 
 sudo ln -s /data/rfparty/logs/log.$sessionStamp.txt /data/rfparty/logs/active-log.txt
 

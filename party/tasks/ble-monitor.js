@@ -2,6 +2,8 @@
 const HCIBindings = require('@abandonware/noble/lib/hci-socket/bindings')
 const Noble = require('@abandonware/noble/lib/noble')
 
+const DeltaTime = require('../../src/utils/delta-time')
+
 /*const noble = new Noble(new HCIBindings({
   deviceId: 1,
   userChannel: true,
@@ -19,6 +21,7 @@ const moment = require('moment')
 
 const debug = require('debug')('rfparty.task.ble-monitor')
 
+const PENDING_LIMIT = 1
 
 class BleMonitorTask extends ITask {
 
@@ -33,7 +36,10 @@ class BleMonitorTask extends ITask {
     this.resetTimer = null
     this.scanTimer = null
     this.scanIntervalMs = 60000
+    this.drainPendingIntervalMs = 800
 
+    this.drainingPending = false
+    this.pendingCount = 0
     this.packetCount = 0
     this.stationCount = 0
     this.duplicateCount = 0
@@ -89,13 +95,24 @@ class BleMonitorTask extends ITask {
   }
 
   handleScanTimer = async ()=>{
-    debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount)
+    debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount, ' pending', this.pendingCount)
     debug('scan interval - state = ',noble.state)
-
 
     if(noble.state == 'poweredOn' && this.scanning){
       debug('scan interval - stopping scan')
       await this.stopScan()
+    }
+
+    if(this.pendingCount > PENDING_LIMIT){
+      this.drainingPending = true
+
+      debug('draining pending')
+
+      this.scanTimer = setTimeout(this.handleScanTimer, this.drainPendingIntervalMs)
+      return
+    }
+    else{
+      this.drainingPending = false
     }
 
 
@@ -103,6 +120,36 @@ class BleMonitorTask extends ITask {
       debug('skipping scan start, adapter not powered on')
       this.scanTimer = setTimeout(this.handleScanTimer, this.scanIntervalMs)
       return
+    }
+
+    debug('cleaning cache')
+
+    let now = moment()
+
+    for(let dev in this.advMap){
+      debug('\t', dev)
+
+      for(let eir in this.advMap[dev]){
+
+        
+        let adv = this.advMap[dev][eir]
+        let diff = now.diff( adv[0] )
+        
+        debug('\t\t', eir, ' diff', diff)
+
+        if(diff >= this.scanIntervalMs){
+          debug('delete')
+          delete this.advMap[dev][eir]
+        }
+
+      }
+
+      let devNode = this.advMap[dev]
+
+      if(Object.keys(devNode).length < 1){
+        debug('delete')
+        delete this.advMap[dev]
+      }
     }
 
     debug('scan interval - starting scan')
@@ -142,7 +189,7 @@ class BleMonitorTask extends ITask {
       debug('reset cancelled')
     }
 
-    this.advMap = {}
+    //this.advMap = {}
     
     if(!this.scanning || noble.state != 'poweredOn'){ return }
     
@@ -269,8 +316,12 @@ class BleMonitorTask extends ITask {
   handleDeviceDiscovery = async (device)=>{
     //debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.mtu} ${Object.keys(device)} ${JSON.stringify(device.advertisement)}`)
 
+    this.pendingCount++
 
     //! device.advertisement.eir is Buffer
+    
+
+    let cacheCheckTime = new DeltaTime().start()
     
     let eirString64 = device.advertisement.eir.toString('base64')
 
@@ -285,20 +336,23 @@ class BleMonitorTask extends ITask {
         this.advMap[device.address] = {}
       }
 
-      this.advMap[device.address][eirString64] = [now, device.rssi, device.rssi]  //! timestamp, rssi_low, rssi_high
+      let delayMs = Math.round(Math.random() * (this.scanIntervalMs*0.3))
+
+      this.advMap[device.address][eirString64] = [now.add(delayMs, 'ms'), device.rssi, device.rssi]  //! timestamp, rssi_low, rssi_high
     }
 
     if(heard){
 
       // check if we heard within a scanInterval?
 
-      //let diff = heard[0].diff( now )
-      //if(diff < this.scanIntervalMs){
+      let diff = now.diff( heard[0] )
+      if(diff < this.scanIntervalMs){
         // only store if rssi pushes power bounds up or down
 
         //if(device.rssi >= heard[1] && device.rssi <= heard[2]){
           //debug('\t','skip - within', device.address, heard[1], heard[2])
           this.duplicateCount++
+          this.pendingCount--
           return
         //}
 
@@ -310,16 +364,22 @@ class BleMonitorTask extends ITask {
 
         //debug('bounds push')
 
-      /*} else {
+      } else {
+        debug('delete', device.address)
+        delete this.advMap[device.address]
         createCacheEntry()
-      }*/
+      }
   
     } else {
       createCacheEntry()
     }
+  
+    cacheCheckTime.stop()
+
+    let factoryTime = new DeltaTime().start()
 
 
-    debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.connectable} ${device.scannable} ${device.state} ${device.mtu} ${eirString64}`)
+    //debug(`device discovered: ${device.address} ${device.addressType} ${device.rssi} ${device.connectable} ${device.scannable} ${device.state} ${device.mtu} ${eirString64}`)
     //this.emit('address', device)
     
 
@@ -337,22 +397,49 @@ class BleMonitorTask extends ITask {
       lastLocation = this.gpsdTask.lastLocation
     }
     
-    debug(lastLocation)
+    //debug(lastLocation)
 
     const BleAdv = this.context.party.factory.getFactory('ble_adv')
     const BleStation = this.context.party.factory.getFactory('ble_station')
 
+    factoryTime.stop()
+
+    let deviceDocTime = new DeltaTime().start()
     let deviceDoc = await BleAdv.indexBleDevice(this.context.party, dev, lastLocation)
-    debug('deviceDoc')
+    deviceDocTime.stop()
+
+    //debug('deviceDoc')
+
+    let stationDocTime = new DeltaTime().start()
     let station = await BleStation.indexBleStation(this.context.party, deviceDoc)
-    debug('stationDoc')
+    stationDocTime.stop()
+
+    //debug('stationDoc')
+
+    const latencyReport = {
+      cache: cacheCheckTime.deltaMs,
+      factory: factoryTime.deltaMs,
+      device: deviceDocTime.deltaMs,
+      station: stationDocTime.deltaMs,
+      cached: Object.keys(this.advMap).length
+    }
+
+    let isNew = false
 
     if(station.data.timebounds.first == station.data.timebounds.last){
       this.stationCount++
 
-      debug(station.data)
+      isNew = true
+
+      //debug(station.data)
       //this.emit('station_count', this.stationCount)
     }
+
+    this.pendingCount--
+    latencyReport.isNew = isNew
+    latencyReport.pending = this.pendingCount
+
+    debug('latency - ', dev.id, JSON.stringify(latencyReport, null, 2))
 
     this.packetCount++
     //this.emit('packet_count', this.packetCount)
