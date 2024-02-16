@@ -95,7 +95,7 @@ class BleMonitorTask extends ITask {
   }
 
   handleScanTimer = async ()=>{
-    debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount, ' pending', this.pendingCount)
+    debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount, ' pending', this.pendingCount, ' cached', Object.keys(this.advMap).length)
     debug('scan interval - state = ',noble.state)
 
     if(noble.state == 'poweredOn' && this.scanning){
@@ -127,7 +127,7 @@ class BleMonitorTask extends ITask {
     let now = moment()
 
     for(let dev in this.advMap){
-      debug('\t', dev)
+      //debug('\t', dev)
 
       for(let eir in this.advMap[dev]){
 
@@ -135,10 +135,10 @@ class BleMonitorTask extends ITask {
         let adv = this.advMap[dev][eir]
         let diff = now.diff( adv[0] )
         
-        debug('\t\t', eir, ' diff', diff)
+        //debug('\t\t', eir, ' diff', diff)
 
         if(diff >= this.scanIntervalMs){
-          debug('delete')
+          //debug('delete')
           delete this.advMap[dev][eir]
         }
 
@@ -147,7 +147,7 @@ class BleMonitorTask extends ITask {
       let devNode = this.advMap[dev]
 
       if(Object.keys(devNode).length < 1){
-        debug('delete')
+        //debug('delete')
         delete this.advMap[dev]
       }
     }
@@ -365,7 +365,7 @@ class BleMonitorTask extends ITask {
         //debug('bounds push')
 
       } else {
-        debug('delete', device.address)
+        //debug('delete', device.address)
         delete this.advMap[device.address]
         createCacheEntry()
       }
@@ -439,7 +439,7 @@ class BleMonitorTask extends ITask {
     latencyReport.isNew = isNew
     latencyReport.pending = this.pendingCount
 
-    debug('latency - ', dev.id, JSON.stringify(latencyReport, null, 2))
+    //debug('latency - ', dev.id, JSON.stringify(latencyReport, null, 2))
 
     this.packetCount++
     //this.emit('packet_count', this.packetCount)
