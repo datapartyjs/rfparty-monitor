@@ -36,6 +36,7 @@ class BleMonitorTask extends ITask {
     this.resetTimer = null
     this.scanTimer = null
     this.scanIntervalMs = 60000
+    this.observationIntervalMs = 60000
     this.drainPendingIntervalMs = 800
 
     this.drainingPending = false
@@ -76,16 +77,9 @@ class BleMonitorTask extends ITask {
         this.scanTimer = null
       }
 
-      debug('state', noble.state)
+      debug('noble state', noble.state)
 
       await this.handleScanTimer()
-
-      /*this.scanTimer = setInterval(async ()=>{
-        
-      }, this.scanIntervalMs)*/
-
-      //await this.stopScan()
-      //await this.startScan()
     }
     catch(err){
       debug('error starting', err)
@@ -95,11 +89,11 @@ class BleMonitorTask extends ITask {
   }
 
   handleScanTimer = async ()=>{
-    debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount, ' pending', this.pendingCount, ' cached', Object.keys(this.advMap).length)
+    debug('PROCESSED ', this.packetCount, '✉️ ', this.stationCount, '📡  ', 'duplicateCount=',this.duplicateCount, ' pending', this.pendingCount, ' cached', Object.keys(this.advMap).length,  (new Date()).toLocaleString())
     debug('scan interval - state = ',noble.state)
 
     if(noble.state == 'poweredOn' && this.scanning){
-      debug('scan interval - stopping scan')
+      debug('scan interval - stopping scan',  (new Date()).toLocaleString())
       await this.stopScan()
     }
 
@@ -132,12 +126,12 @@ class BleMonitorTask extends ITask {
       for(let eir in this.advMap[dev]){
 
         
-        let adv = this.advMap[dev][eir]
-        let diff = now.diff( adv[0] )
+        let heard = this.advMap[dev][eir]
+        let diff = now.diff( heard[3] )
         
         //debug('\t\t', eir, ' diff', diff)
 
-        if(diff >= this.scanIntervalMs){
+        if(diff >= this.observationIntervalMs){
           //debug('delete')
           delete this.advMap[dev][eir]
         }
@@ -152,9 +146,9 @@ class BleMonitorTask extends ITask {
       }
     }
 
-    debug('scan interval - starting scan')
+    debug('scan interval - starting scan', (new Date()).toLocaleString())
     await this.startScan()
-    debug('scan interval - scanning')
+    debug('scan interval - scanning',  (new Date()).toLocaleString())
 
 
     this.scanTimer = setTimeout(this.handleScanTimer, this.scanIntervalMs)
@@ -338,15 +332,15 @@ class BleMonitorTask extends ITask {
 
       let delayMs = Math.round(Math.random() * (this.scanIntervalMs*0.3))
 
-      this.advMap[device.address][eirString64] = [now.add(delayMs, 'ms'), device.rssi, device.rssi]  //! timestamp, rssi_low, rssi_high
+      this.advMap[device.address][eirString64] = [now.add(delayMs, 'ms'), device.rssi, device.rssi, now]  //! cache_timestamp, rssi_low, rssi_high, last_observation
     }
 
     if(heard){
 
       // check if we heard within a scanInterval?
 
-      let diff = now.diff( heard[0] )
-      if(diff < this.scanIntervalMs){
+      let diff = now.diff( heard[3] )
+      if(diff < this.observationIntervalMs){
         // only store if rssi pushes power bounds up or down
 
         //if(device.rssi >= heard[1] && device.rssi <= heard[2]){
