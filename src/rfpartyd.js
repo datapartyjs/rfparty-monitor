@@ -41,16 +41,10 @@ async function main(){
     config: config,
     qbOptions: {
       debounce: false,
-      find_dedup: false,
+      find_dedup: true,
       timeout: false
     }
   })
-
-
-
-  debug('partying')
-
-  //const service = new Dataparty.IService({}, RFPartyService)
 
   const runner = new Dataparty.ServiceRunnerNode({
     party, service,
@@ -61,7 +55,7 @@ async function main(){
   const webHost = new Dataparty.ServiceHost({
     runner,
     trust_proxy: false,
-    //listenUri: 'http://0.0.0.0:4000'
+    /*listenUri: 'http://0.0.0.0:4000'*/
   })
 
 
@@ -76,6 +70,11 @@ async function main(){
   
 
   await party.start()
+
+  debug('compacting')
+  await party.db.compactDatabase()
+  debug('compacted')
+
   await runner.start()
   await webHost.start()
   await unixSocketHost.start()
@@ -94,17 +93,9 @@ async function main(){
   }
 
   process.on('exit', exitHandler)
-  process.on('SIGINT', exitHandler);
-  // catches "kill pid" (for example: nodemon restart)
-  //process.on('SIGUSR1', exitHandler);
-  //process.on('SIGUSR2', exitHandler);
+  process.on('SIGINT', exitHandler)
 
-  // catches uncaught exceptions
-  //process.on('uncaughtException', exitHandler);
-
-  console.log('started')
-  
-  //process.exit()
+  console.log('partying')
 }
 
 
